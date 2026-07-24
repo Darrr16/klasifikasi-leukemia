@@ -27,19 +27,20 @@ plt.rcParams.update({
 st.title('📈 Eksplorasi Data')
 st.caption('Ringkasan dataset, distribusi kelas, dan preprocessing pipeline.')
 
-# ── Dataset Summary (Hardcoded) ────────────────────────────────────────────────
+# ── Dataset Summary (from CALL.ipynb logs) ────────────────────────────────
 DATASET_SUMMARY = {
-    'benign'    : {'raw': 100,  'train': 512, 'test': 11},
-    'EarlyPreB' : {'raw': 249,  'train': 512, 'test': 28},
-    'PreB'      : {'raw': 256,  'train': 512, 'test': 28},
-    'ProB'      : {'raw': 391,  'train': 784, 'test': 44},
+    'benign'    : {'raw': 512,  'train': 800, 'test': '~73'},
+    'EarlyPreB' : {'raw': 979,  'train': 881, 'test': '~88'},
+    'PreB'      : {'raw': 955,  'train': 859, 'test': '~86'},
+    'ProB'      : {'raw': 796,  'train': 800, 'test': '~72'},
 }
 
 def get_distribution():
-    """Return hardcoded distribution data (no file I/O needed)"""
+    """Return distribution data from CALL.ipynb training logs"""
     raw_counts  = {cls: DATASET_SUMMARY[cls]['raw']   for cls in CLASS_NAMES}
     prep_counts = {cls: DATASET_SUMMARY[cls]['train'] for cls in CLASS_NAMES}
-    test_counts = {cls: DATASET_SUMMARY[cls]['test']  for cls in CLASS_NAMES}
+    # test_counts approximate (90/10 split stratified)
+    test_counts = {'benign': 73, 'EarlyPreB': 88, 'PreB': 86, 'ProB': 72}
     return raw_counts, prep_counts, test_counts
 
 
