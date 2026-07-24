@@ -6,7 +6,7 @@
 # Python  : 3.9 – 3.11 recommended
 
 # ── Deep Learning ─────────────────────────────────────────────────────────────
-tensorflow>=2.15.0          # CPU build; kompatibel dengan Python terbaru di Streamlit Cloud
+tensorflow==2.13.0          # Kompatibel dengan Python 3.11
 
 # ── Data Processing ───────────────────────────────────────────────────────────
 numpy==1.24.3
