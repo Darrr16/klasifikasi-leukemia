@@ -136,36 +136,6 @@ for col, cls in zip([col1, col2, col3, col4], CLASS_NAMES):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SECTION 3: Augmentasi Demo (Dummy Image)
-# ══════════════════════════════════════════════════════════════════════════════
-st.markdown('---')
-st.markdown('### Contoh Augmentasi Preprocessing')
-
-st.info('📌 **Catatan:** Fitur galeri gambar memerlukan dataset lokal (~2GB). '
-        'Di bawah ini adalah demonstrasi menggunakan dummy image.')
-
-# Create dummy image for demo
-np.random.seed(42)
-dummy_img = np.random.randint(50, 200, (224, 224, 3), dtype=np.uint8)
-
-# Augmentation examples
-aug_dict = {
-    'Original': dummy_img,
-    'Flip Horizontal': np.fliplr(dummy_img),
-    'Flip Vertikal': np.flipud(dummy_img),
-    'Rotasi 90°': np.rot90(dummy_img),
-}
-
-cols = st.columns(len(aug_dict))
-for col, (label, img) in zip(cols, aug_dict.items()):
-    with col:
-        st.image(img, caption=label, use_container_width=True)
-
-st.caption(
-    '✅ **Production:** Setiap gambar asli → K-Means segmentation twin (2×data) + top-up flip/rotate untuk balance'
-)
-
-# ══════════════════════════════════════════════════════════════════════════════
 # SECTION 4: Pipeline Preprocessing
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown('---')
