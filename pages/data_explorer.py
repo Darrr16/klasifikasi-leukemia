@@ -12,7 +12,6 @@ import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import cv2
 import streamlit as st
 from PIL import Image
 
@@ -156,35 +155,51 @@ st.markdown('### Contoh Augmentasi Preprocessing')
 aug_paths = get_sample_images(DATA_RAW, CLASS_NAMES[0], 1)
 
 if aug_paths:
-    orig     = cv2.resize(cv2.imread(aug_paths[0]), IMG_SIZE)
-    orig_rgb = cv2.cvtColor(orig, cv2.COLOR_BGR2RGB)
+    try:
+        import cv2
+        orig_pil = Image.open(aug_paths[0]).resize(IMG_SIZE)
+        orig     = np.array(orig_pil)
+        
+        # K-Means segmentation (k=3)
+        def kmeans_segment(img_rgb, k=3):
+            flat = img_rgb.reshape((-1, 3)).astype(np.float32)
+            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 20, 0.5)
+            _, labels, centers = cv2.kmeans(flat, k, None, criteria, 5, cv2.KMEANS_RANDOM_CENTERS)
+            centers = centers.astype(np.uint8)
+            result  = centers[labels.flatten()].reshape(img_rgb.shape)
+            return result
 
-    # K-Means segmentation (k=3)
-    def kmeans_segment(img_bgr, k=3):
-        flat = img_bgr.reshape((-1, 3)).astype(np.float32)
-        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 20, 0.5)
-        _, labels, centers = cv2.kmeans(flat, k, None, criteria, 5, cv2.KMEANS_RANDOM_CENTERS)
-        centers = centers.astype(np.uint8)
-        result  = centers[labels.flatten()].reshape(img_bgr.shape)
-        return cv2.cvtColor(result, cv2.COLOR_BGR2RGB)
-
-    aug_dict = {
-        'Original'            : orig_rgb,
-        'K-Means Segmentasi'  : kmeans_segment(orig, k=3),
-        'Flip Horizontal'     : cv2.flip(orig_rgb, 1),
-        'Flip Vertikal'       : cv2.flip(orig_rgb, 0),
-        'Rotasi 90°'          : cv2.rotate(orig_rgb, cv2.ROTATE_90_CLOCKWISE),
-        'Rotasi 180°'         : cv2.rotate(orig_rgb, cv2.ROTATE_180),
-    }
-    cols = st.columns(len(aug_dict))
-    for col, (label, img) in zip(cols, aug_dict.items()):
-        with col:
-            st.image(img, caption=label, use_container_width=True)
-    st.caption(
-        'Setiap gambar latih menghasilkan **2 output dasar**: '
-        'gambar asli + twin K-Means segmentation (k=3). '
-        'Augmentasi flip/rotate dipakai untuk top-up kelas yang belum mencapai target.'
-    )
+        aug_dict = {
+            'Original'            : orig,
+            'K-Means Segmentasi'  : kmeans_segment(orig, k=3),
+            'Flip Horizontal'     : np.fliplr(orig),
+            'Flip Vertikal'       : np.flipud(orig),
+            'Rotasi 90°'          : np.rot90(orig),
+            'Rotasi 180°'         : np.rot90(orig, 2),
+        }
+        cols = st.columns(len(aug_dict))
+        for col, (label, img) in zip(cols, aug_dict.items()):
+            with col:
+                st.image(img, caption=label, use_container_width=True)
+        st.caption(
+            'Setiap gambar latih menghasilkan **2 output dasar**: '
+            'gambar asli + twin K-Means segmentation (k=3). '
+            'Augmentasi flip/rotate dipakai untuk top-up kelas yang belum mencapai target.'
+        )
+    except ImportError:
+        st.warning('⚠️ OpenCV (cv2) tidak tersedia. Menampilkan contoh dasar saja.')
+        orig_pil = Image.open(aug_paths[0]).resize(IMG_SIZE)
+        orig = np.array(orig_pil)
+        
+        aug_dict = {
+            'Original': orig,
+            'Flip Horizontal': np.fliplr(orig),
+            'Flip Vertikal': np.flipud(orig),
+        }
+        cols = st.columns(len(aug_dict))
+        for col, (label, img) in zip(cols, aug_dict.items()):
+            with col:
+                st.image(img, caption=label, use_container_width=True)
 else:
     st.info('Contoh augmentasi tidak dapat ditampilkan karena folder data belum tersedia.')
 
