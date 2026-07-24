@@ -1,0 +1,9 @@
+{
+  "model_name": "EfficientNetB0 Baseline",
+  "test_accuracy": 0.9599999785423279,
+  "test_loss": 0.11490865051746368,
+  "mae": 0.08923076923076922,
+  "total_epochs": 31,
+  "best_val_acc": 0.9520958065986633,
+  "best_val_loss": 0.1190842017531395
+}

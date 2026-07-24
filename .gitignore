@@ -15,10 +15,16 @@ ENV/
 # Streamlit
 .streamlit/
 
-# Local data and generated outputs
+# Local data (tapi jangan push ke github)
 data/
-results/
+
+# Large files
+results/*.npz
 models/*.h5
+
+# Local documentation (untuk development saja)
+PANDUAN_SETUP.md
+STREAMLIT_DEPLOY_GUIDE.md
 
 # OS files
 .DS_Store

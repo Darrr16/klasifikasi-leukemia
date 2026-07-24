@@ -1,0 +1,9 @@
+{
+  "model_name": "EfficientNetB0 + CBAM",
+  "test_accuracy": 0.9938461780548096,
+  "test_loss": 0.11131937801837921,
+  "mae": 0.012307692307692308,
+  "total_epochs": 42,
+  "best_val_acc": 0.9985029697418213,
+  "best_val_loss": 0.10379105061292648
+}
