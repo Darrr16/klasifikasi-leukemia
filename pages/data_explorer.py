@@ -37,6 +37,22 @@ DATA_TEST = os.path.join(ROOT_DIR, 'data', 'tmp', 'prepared_test')
 st.title('📈 Eksplorasi Data')
 st.caption('Distribusi kelas, contoh gambar, dan ilustrasi augmentasi preprocessing.')
 
+# ── Dataset existence check ────────────────────────────────────────────────────
+if not os.path.isdir(DATA_RAW):
+    st.error(
+        '❌ **Dataset tidak ditemukan!**\n\n'
+        f'Folder `data/Blood cell Cancer [ALL]/` tidak ada di sistem.\n\n'
+        '**Untuk menjalankan Eksplorasi Data lokal:**\n'
+        '1. Download dataset dari [Kaggle: Blood Cell Cancer](https://www.kaggle.com/)\n'
+        '2. Extract ke folder `data/Blood cell Cancer [ALL]/`\n'
+        '3. Struktur: `data/Blood cell Cancer [ALL]/benign/`, `data/Blood cell Cancer [ALL]/EarlyPreB/`, dll.\n\n'
+        '**Catatan:**\n'
+        '- Dataset (~2GB) tidak disertakan di GitHub (terlalu besar)\n'
+        '- Fitur ini hanya berfungsi dengan dataset lokal\n'
+        '- Prediction & Performance masih bisa digunakan tanpa dataset'
+    )
+    st.stop()
+
 
 def count_images(base_dir: str) -> dict:
     counts = {}
