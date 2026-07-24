@@ -1,12 +1,10 @@
 """
 pages/data_explorer.py
 =======================
-Eksplorasi dataset: distribusi kelas, galeri gambar, augmentasi.
+Eksplorasi Dataset Ringkasan - informasi preprocessing tanpa akses file dataset.
+(Dataset lokal ~2GB tidak disertakan di GitHub)
 """
 
-import os
-import sys
-import random
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -14,9 +12,6 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import streamlit as st
 from PIL import Image
-
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT_DIR, 'utils'))
 
 from helpers import CLASS_NAMES, IMG_SIZE
 
@@ -28,59 +23,24 @@ plt.rcParams.update({
     'text.color'     : '#f1f5f9', 'grid.color'     : '#334155',
 })
 
-# ── Path ───────────────────────────────────────────────────────────────────────
-DATA_RAW  = os.path.join(ROOT_DIR, 'data', 'Blood cell Cancer [ALL]')
-DATA_PREP = os.path.join(ROOT_DIR, 'data', 'tmp', 'prepared_data')
-DATA_TEST = os.path.join(ROOT_DIR, 'data', 'tmp', 'prepared_test')
-
 # ── Header ─────────────────────────────────────────────────────────────────────
 st.title('📈 Eksplorasi Data')
-st.caption('Distribusi kelas, contoh gambar, dan ilustrasi augmentasi preprocessing.')
+st.caption('Ringkasan dataset, distribusi kelas, dan preprocessing pipeline.')
 
-# ── Dataset existence check ────────────────────────────────────────────────────
-if not os.path.isdir(DATA_RAW):
-    st.error(
-        '❌ **Dataset tidak ditemukan!**\n\n'
-        f'Folder `data/Blood cell Cancer [ALL]/` tidak ada di sistem.\n\n'
-        '**Untuk menjalankan Eksplorasi Data lokal:**\n'
-        '1. Download dataset dari [Kaggle: Blood Cell Cancer](https://www.kaggle.com/)\n'
-        '2. Extract ke folder `data/Blood cell Cancer [ALL]/`\n'
-        '3. Struktur: `data/Blood cell Cancer [ALL]/benign/`, `data/Blood cell Cancer [ALL]/EarlyPreB/`, dll.\n\n'
-        '**Catatan:**\n'
-        '- Dataset (~2GB) tidak disertakan di GitHub (terlalu besar)\n'
-        '- Fitur ini hanya berfungsi dengan dataset lokal\n'
-        '- Prediction & Performance masih bisa digunakan tanpa dataset'
-    )
-    st.stop()
+# ── Dataset Summary (Hardcoded) ────────────────────────────────────────────────
+DATASET_SUMMARY = {
+    'benign'    : {'raw': 100,  'train': 512, 'test': 11},
+    'EarlyPreB' : {'raw': 249,  'train': 512, 'test': 28},
+    'PreB'      : {'raw': 256,  'train': 512, 'test': 28},
+    'ProB'      : {'raw': 391,  'train': 784, 'test': 44},
+}
 
-
-def count_images(base_dir: str) -> dict:
-    counts = {}
-    if not os.path.isdir(base_dir):
-        return counts
-    for cls in CLASS_NAMES:
-        cls_path = os.path.join(base_dir, cls)
-        if os.path.isdir(cls_path):
-            n = len([f for f in os.listdir(cls_path)
-                     if f.lower().endswith(('.jpg', '.jpeg', '.png', '.bmp'))])
-            counts[cls] = n
-    return counts
-
-
-@st.cache_data
 def get_distribution():
-    return count_images(DATA_RAW), count_images(DATA_PREP), count_images(DATA_TEST)
-
-
-@st.cache_data
-def get_sample_images(base_dir: str, cls: str, n: int = 6) -> list:
-    cls_path = os.path.join(base_dir, cls)
-    if not os.path.isdir(cls_path):
-        return []
-    files = [f for f in os.listdir(cls_path)
-             if f.lower().endswith(('.jpg', '.jpeg', '.png', '.bmp'))]
-    random.seed(42)
-    return [os.path.join(cls_path, f) for f in random.sample(files, min(n, len(files)))]
+    """Return hardcoded distribution data (no file I/O needed)"""
+    raw_counts  = {cls: DATASET_SUMMARY[cls]['raw']   for cls in CLASS_NAMES}
+    prep_counts = {cls: DATASET_SUMMARY[cls]['train'] for cls in CLASS_NAMES}
+    test_counts = {cls: DATASET_SUMMARY[cls]['test']  for cls in CLASS_NAMES}
+    return raw_counts, prep_counts, test_counts
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -138,86 +98,71 @@ Kelas `benign` memiliki sampel lebih sedikit dibanding kelas ALL → distribusi 
 else:
     st.info('Folder `data/Blood cell Cancer [ALL]/` tidak ditemukan. Pastikan dataset sudah diunduh.')
 
+
 # ══════════════════════════════════════════════════════════════════════════════
-# SECTION 2: Galeri Gambar
+# SECTION 2: Info Kelas & Karakteristik
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown('---')
-st.markdown('### Galeri Gambar per Kelas')
+st.markdown('### Karakteristik Kelas Blood Cancer [ALL]')
 
-src_option = st.radio('Sumber:', ['Data Asli (raw)', 'Data Siap Latih (prepared)'], horizontal=True)
-src_dir     = DATA_RAW if src_option == 'Data Asli (raw)' else DATA_PREP
-sel_cls     = st.selectbox('Kelas:', CLASS_NAMES)
-n_show      = st.slider('Jumlah gambar:', 3, 12, 6)
+class_info = {
+    'benign': {
+        'desc': 'Sel darah putih normal',
+        'karakteristik': 'Nukleus kecil, sitoplasma sehat, bentuk regular'
+    },
+    'EarlyPreB': {
+        'desc': 'Leukemia Limfoblastik Akut (early precursor)',
+        'karakteristik': 'Nukleus besar, sitoplasma sedikit, bentuk irregular'
+    },
+    'PreB': {
+        'desc': 'Leukemia Limfoblastik Akut (pre-cursor B)',
+        'karakteristik': 'Nukleus dominan, sitoplasma minimal, chromatin coarse'
+    },
+    'ProB': {
+        'desc': 'Leukemia Limfoblastik Akut (progenitor B)',
+        'karakteristik': 'Sel immature, nukleus sangat besar, sitoplasma sedikit'
+    },
+}
 
-sample_paths = get_sample_images(src_dir, sel_cls, n_show)
+col1, col2, col3, col4 = st.columns(4)
+for col, cls in zip([col1, col2, col3, col4], CLASS_NAMES):
+    with col:
+        st.subheader(f"🔵 {cls}")
+        st.caption(f"*{class_info[cls]['desc']}*")
+        st.write(f"**Ciri:** {class_info[cls]['karakteristik']}")
+        raw = DATASET_SUMMARY[cls]['raw']
+        st.write(f"📊 Raw: **{raw}** img")
 
-if sample_paths:
-    n_col = min(n_show, 6)
-    cols  = st.columns(n_col)
-    for i, path in enumerate(sample_paths):
-        with cols[i % n_col]:
-            st.image(Image.open(path),
-                     caption=os.path.basename(path)[:22],
-                     use_container_width=True)
-else:
-    st.info(f'Tidak ada gambar untuk kelas `{sel_cls}` di sumber yang dipilih.')
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SECTION 3: Contoh Augmentasi
+# SECTION 3: Augmentasi Demo (Dummy Image)
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown('---')
 st.markdown('### Contoh Augmentasi Preprocessing')
 
-aug_paths = get_sample_images(DATA_RAW, CLASS_NAMES[0], 1)
+st.info('📌 **Catatan:** Fitur galeri gambar memerlukan dataset lokal (~2GB). '
+        'Di bawah ini adalah demonstrasi menggunakan dummy image.')
 
-if aug_paths:
-    try:
-        import cv2
-        orig_pil = Image.open(aug_paths[0]).resize(IMG_SIZE)
-        orig     = np.array(orig_pil)
-        
-        # K-Means segmentation (k=3)
-        def kmeans_segment(img_rgb, k=3):
-            flat = img_rgb.reshape((-1, 3)).astype(np.float32)
-            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 20, 0.5)
-            _, labels, centers = cv2.kmeans(flat, k, None, criteria, 5, cv2.KMEANS_RANDOM_CENTERS)
-            centers = centers.astype(np.uint8)
-            result  = centers[labels.flatten()].reshape(img_rgb.shape)
-            return result
+# Create dummy image for demo
+np.random.seed(42)
+dummy_img = np.random.randint(50, 200, (224, 224, 3), dtype=np.uint8)
 
-        aug_dict = {
-            'Original'            : orig,
-            'K-Means Segmentasi'  : kmeans_segment(orig, k=3),
-            'Flip Horizontal'     : np.fliplr(orig),
-            'Flip Vertikal'       : np.flipud(orig),
-            'Rotasi 90°'          : np.rot90(orig),
-            'Rotasi 180°'         : np.rot90(orig, 2),
-        }
-        cols = st.columns(len(aug_dict))
-        for col, (label, img) in zip(cols, aug_dict.items()):
-            with col:
-                st.image(img, caption=label, use_container_width=True)
-        st.caption(
-            'Setiap gambar latih menghasilkan **2 output dasar**: '
-            'gambar asli + twin K-Means segmentation (k=3). '
-            'Augmentasi flip/rotate dipakai untuk top-up kelas yang belum mencapai target.'
-        )
-    except ImportError:
-        st.warning('⚠️ OpenCV (cv2) tidak tersedia. Menampilkan contoh dasar saja.')
-        orig_pil = Image.open(aug_paths[0]).resize(IMG_SIZE)
-        orig = np.array(orig_pil)
-        
-        aug_dict = {
-            'Original': orig,
-            'Flip Horizontal': np.fliplr(orig),
-            'Flip Vertikal': np.flipud(orig),
-        }
-        cols = st.columns(len(aug_dict))
-        for col, (label, img) in zip(cols, aug_dict.items()):
-            with col:
-                st.image(img, caption=label, use_container_width=True)
-else:
-    st.info('Contoh augmentasi tidak dapat ditampilkan karena folder data belum tersedia.')
+# Augmentation examples
+aug_dict = {
+    'Original': dummy_img,
+    'Flip Horizontal': np.fliplr(dummy_img),
+    'Flip Vertikal': np.flipud(dummy_img),
+    'Rotasi 90°': np.rot90(dummy_img),
+}
+
+cols = st.columns(len(aug_dict))
+for col, (label, img) in zip(cols, aug_dict.items()):
+    with col:
+        st.image(img, caption=label, use_container_width=True)
+
+st.caption(
+    '✅ **Production:** Setiap gambar asli → K-Means segmentation twin (2×data) + top-up flip/rotate untuk balance'
+)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SECTION 4: Pipeline Preprocessing
