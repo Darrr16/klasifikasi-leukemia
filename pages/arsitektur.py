@@ -130,8 +130,8 @@ with t2:
 Class weighting **tidak digunakan** (`class_weight=None`).
 
 Penyeimbangan kelas dilakukan sepenuhnya pada tahap preprocessing:
-- Setiap gambar latih → **twin K-Means segmentation** (k=3) = 2× data dasar
-- Kelas yang basis-nya masih di bawah target → **top-up flip/rotate** hingga seimbang
+- **K-Means Segmentation** (k=3) untuk meningkatkan kontras fitur sel diagnostik
+- Kelas yang kurang sampel → **top-up flip/rotate** hingga distribusi lebih seimbang
 
 Penambahan class weight di atas data yang sudah seimbang berisiko *over-correction*.
 """)

@@ -7,7 +7,8 @@
 
 # ── Deep Learning ─────────────────────────────────────────────────────────────
 tensorflow==2.13.0          # Kompatibel dengan Python 3.11
-
+# ── Model Hub ──────────────────────────────────────────────────────────────────
+huggingface_hub>=0.19.0     # Download models from Hugging Face Hub
 # ── Data Processing ───────────────────────────────────────────────────────────
 numpy==1.24.3
 pandas==2.0.3

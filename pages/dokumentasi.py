@@ -44,8 +44,7 @@ with tab1:
 3. Tab yang tersedia:
    - **Confusion Matrix** — heatmap normalized & raw, insight otomatis
    - **Kurva Training** — loss & accuracy per epoch
-   - **Classification Report** — precision, recall, F1, specificity per kelas
-   - **Sample Prediksi** — grid 5×5 dengan warna kode kode prediksi
+   - **Sample Prediksi** — grid 5×5 dengan warna kode prediksi
    - **Raw JSON** — file metrics lengkap + tombol download
 """)
 

@@ -23,6 +23,7 @@ from helpers import (
     load_metrics, load_history, load_results,
     CLASS_NAMES, PLOT_FILES, RESULTS_DIR,
 )
+# Note: classification_report dan confusion_matrix masih digunakan di confusion matrix tab
 
 # ── Matplotlib dark style ──────────────────────────────────────────────────────
 plt.rcParams.update({
@@ -89,10 +90,9 @@ with st.expander('Bandingkan kedua model', expanded=False):
 st.markdown('---')
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4 = st.tabs([
     'Confusion Matrix',
     'Kurva Training',
-    'Classification Report',
     'Sample Prediksi',
     'Raw JSON',
 ])
@@ -205,53 +205,9 @@ with tab2:
         with hc3: st.metric('Total Epochs',  len(history.get('loss', [])))
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 3: CLASSIFICATION REPORT
+# TAB 3: SAMPLE PREDIKSI
 # ─────────────────────────────────────────────────────────────────────────────
 with tab3:
-    if results is not None and 'true_classes' in results and 'predicted_classes' in results:
-        y_true = results['true_classes']
-        y_pred = results['predicted_classes']
-
-        st.code(classification_report(y_true, y_pred, target_names=CLASS_NAMES), language=None)
-
-        cm   = confusion_matrix(y_true, y_pred)
-        FP   = cm.sum(axis=0) - np.diag(cm)
-        FN   = cm.sum(axis=1) - np.diag(cm)
-        TP   = np.diag(cm)
-        TN   = cm.sum() - (FP + FN + TP)
-        prec = np.where(TP+FP>0, TP/(TP+FP), 0)
-        rec  = np.where(TP+FN>0, TP/(TP+FN), 0)
-        f1   = np.where(prec+rec>0, 2*prec*rec/(prec+rec), 0)
-        spec = np.where(TN+FP>0, TN/(TN+FP), 0)
-
-        report_df = pd.DataFrame({
-            'Kelas'      : CLASS_NAMES,
-            'Precision'  : np.round(prec, 4),
-            'Recall'     : np.round(rec,  4),
-            'F1-Score'   : np.round(f1,   4),
-            'Specificity': np.round(spec, 4),
-            'Support'    : cm.sum(axis=1),
-        })
-        st.dataframe(report_df, hide_index=True, use_container_width=True)
-
-        fig, ax = plt.subplots(figsize=(10, 4))
-        x = np.arange(len(CLASS_NAMES)); w = 0.2
-        ax.bar(x-w*1.5, prec, w, label='Precision',   color='#f87171')
-        ax.bar(x-w*.5,  rec,  w, label='Recall',      color='#60a5fa')
-        ax.bar(x+w*.5,  f1,   w, label='F1-Score',    color='#4ade80')
-        ax.bar(x+w*1.5, spec, w, label='Specificity', color='#fbbf24')
-        ax.set_xticks(x); ax.set_xticklabels(CLASS_NAMES)
-        ax.set_ylim(0, 1.08); ax.legend(); ax.grid(axis='y', alpha=.2)
-        ax.set_title(f'{selected} — Per-Class Metrics')
-        plt.tight_layout()
-        st.pyplot(fig, use_container_width=True)
-    else:
-        st.warning('File `*_results.npz` tidak ditemukan atau tidak mengandung `true_classes`/`predicted_classes`.')
-
-# ─────────────────────────────────────────────────────────────────────────────
-# TAB 4: SAMPLE PREDIKSI
-# ─────────────────────────────────────────────────────────────────────────────
-with tab4:
     img_samp = PLOT_FILES.get(selected, {}).get('sample_predictions', '')
     if os.path.exists(img_samp):
         st.image(img_samp, caption=f'{selected} — Sample Predictions',
@@ -261,9 +217,9 @@ with tab4:
         st.warning('Gambar sample predictions tidak ditemukan di folder `results/`.')
 
 # ─────────────────────────────────────────────────────────────────────────────
-# TAB 5: RAW JSON
+# TAB 4: RAW JSON
 # ─────────────────────────────────────────────────────────────────────────────
-with tab5:
+with tab4:
     st.markdown(f'**Isi file metrics untuk {selected}:**')
     st.json(metrics)
     st.download_button(

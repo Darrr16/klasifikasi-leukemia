@@ -113,10 +113,21 @@ CLASS_DESCRIPTIONS = {
 def load_model(model_name: str = 'EfficientNetB0 + CBAM'):
     import tensorflow as tf
     path = MODEL_FILES.get(model_name)
-    if not path or not os.path.exists(path):
-        st.error(f'Model tidak ditemukan: {path}')
+    
+    if not path:
+        st.error(f'Model tidak dikenal: {model_name}')
         return None
-    return tf.keras.models.load_model(path, compile=False)
+    
+    if not os.path.exists(path):
+        st.error(f'❌ File model tidak ditemukan: {path}')
+        st.info('📌 Pastikan file `.h5` sudah tersedia di folder `models/`')
+        return None
+    
+    try:
+        return tf.keras.models.load_model(path, compile=False)
+    except Exception as e:
+        st.error(f'Error loading model: {e}')
+        return None
 
 
 # ── Cache: load metrics JSON ───────────────────────────────────────────────────

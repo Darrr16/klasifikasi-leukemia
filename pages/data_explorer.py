@@ -86,12 +86,12 @@ if raw_counts:
 Kelas `benign` memiliki sampel lebih sedikit dibanding kelas ALL → distribusi tidak seimbang.
 
 **Strategi yang digunakan:**
-1. **K-Means Segmentation (k=3)** — setiap gambar asli menghasilkan twin hasil segmentasi
-   warna, sehingga struktur sel (inti, sitoplasma, latar belakang) lebih kontras.
-   Ini sekaligus menggandakan jumlah data dasar (2× per kelas).
-2. **Top-up flip/rotate** — kelas yang basisnya (2×n) masih di bawah target
-   ditambah dengan augmentasi flip horizontal, flip vertikal, rotasi 90°/180°
-   yang dipilih secara acak hingga mencapai target.
+1. **K-Means Segmentation (k=3)** — meningkatkan kontras struktur sel (inti, sitoplasma, 
+   latar belakang) melalui segmentasi warna, sehingga model lebih baik mengidentifikasi 
+   fitur diagnostik.
+2. **Top-up flip/rotate** — kelas yang kurang sampel ditambah dengan augmentasi 
+   flip horizontal, flip vertikal, rotasi 90°/180° yang dipilih secara acak 
+   hingga distribusi lebih seimbang.
 3. Kelas besar tidak dipotong.
 
 **Class weights tidak digunakan** — data sudah relatif seimbang setelah langkah di atas.
@@ -136,7 +136,7 @@ for col, cls in zip([col1, col2, col3, col4], CLASS_NAMES):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SECTION 4: Pipeline Preprocessing
+# SECTION 3: Pipeline Preprocessing
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown('---')
 st.markdown('### Pipeline Preprocessing Lengkap')
@@ -146,8 +146,8 @@ st.markdown("""
 |---------|-----------|
 | **1. Train/Test Split** | 90% train (20% → val), 10% test — stratified |
 | **2. Resize** | Semua gambar ke **224 × 224** px |
-| **3. K-Means Segmentation** | Setiap gambar asli → twin segmentasi K-Means (k=3) = **2× data dasar per kelas** |
-| **4. Top-up Oversampling** | Kelas yang basis-nya (2×n) < target → flip/rotate acak sampai seimbang |
+| **3. K-Means Segmentation** | Segmentasi warna K-Means (k=3) untuk meningkatkan kontras fitur sel |
+| **4. Top-up Oversampling** | Kelas yang kurang sampel → augmentasi flip/rotate acak sampai seimbang |
 | **5. Normalisasi** | `rescale=1/255` → piksel `[0,255] → [0,1]` |
 | **6. ImageDataGenerator** | Training: flip + rotate + shift + zoom + brightness |
 
@@ -156,7 +156,7 @@ st.markdown("""
 > Referensi: Fajrina et al. (2024) — 98.48% hanya dengan resize + rescale.
 
 **Class Weights tidak digunakan** (`class_weight=None`) — penyeimbangan sudah cukup
-dilakukan di tahap preprocessing via K-Means duplikasi + top-up flip/rotate.
+dilakukan di tahap preprocessing via K-Means segmentasi + top-up flip/rotate.
 
 **Konfigurasi ImageDataGenerator training:**
 ```python

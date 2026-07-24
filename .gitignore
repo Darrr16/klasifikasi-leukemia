@@ -20,7 +20,9 @@ data/
 
 # Large files
 results/*.npz
-models/*.h5
+results/*_results.npz
+results/*_history.npz
+data/*/
 
 # Local documentation (untuk development saja)
 PANDUAN_SETUP.md
